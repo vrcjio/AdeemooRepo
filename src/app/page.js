@@ -1,12 +1,14 @@
 'use client'
+
 import * as React from 'react';
+
+//UI Creation Lib...
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
 import TextField from '@mui/material/TextField';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
-import Link from 'next/link';
 import Paper from '@mui/material/Paper';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
@@ -14,10 +16,19 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import Copyright from './components/@copy';
 import Typography from '@mui/material/Typography';
+
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
+//--- End UI Creation Lib.....
+
+import Link from 'next/link';
 import * as AuthAPI from "./api/authenticate";
-import axios from 'axios';
 import { Form, useFormik } from 'formik';
 import { singInSchema } from './schemas/singInSchema';
+import * as APICall from './api/authenticate';
+import { useRouter } from 'next/navigation';
+
 
 // TODO remove, this demo shouldn't need to reset the theme.
 
@@ -30,28 +41,27 @@ const defaultTheme = createTheme();
 
 export default function SignInSide() {
 
-  const getData = async (payload) => {
+  const [adsessid, setId] = React.useState();
+  const router = useRouter()
 
-    let data = JSON.stringify(payload);
-    console.log(data) //is convert into string....
-    
-    let config = {
-      method: 'post',
-      url: '/session/login',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      data: data
+  const getData = async (data) => {
+    try {
+      let result = await APICall.onAuthenticate(data)
+      console.log("result is : ",result)
+      if (result.status === 201) {
+        setId(result.data.companies[0])
+        router.push('/dashboard')
+      }
+      if(result.response.status === 403){
+        alert("Already Login")
+        router.push('/dashboard')
+      }
+
+
+
+    } catch (error) {
+      console.log("error is ", error)
     }
-    axios(config)
-      .then((response) => {
-        console.log(JSON.stringify(response.data));
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-      
-
   }
 
 
